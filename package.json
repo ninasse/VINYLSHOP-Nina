@@ -1,5 +1,5 @@
 {
-  "name": "wshop19feb",
+  "name": "ninasvinylshop",
   "version": "0.0.1",
   "description": "A simple webshop",
   "main": "index.js",
@@ -23,7 +23,7 @@
     "FED19S",
     "vinylshop"
   ],
-  "author": "Nina, Maria, Fanny, Marcus, Victor",
+  "author": "Nina",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^4.0.1",
