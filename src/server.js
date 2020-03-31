@@ -8,7 +8,7 @@ const checkOutRoute = require('../routes/checkoutRoute');
 const productRoute = require('../routes/productRoute');
 const errorRoute = require('../routes/errorRoute');
 const cookieParser = require('cookie-parser')
-
+if (process.env.NODE_ENV !== 'production') require('dotenv').config()
 
 app.use(sassMiddleware({
     src: 'sass',
