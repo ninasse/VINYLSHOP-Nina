@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { ROUTE, VIEW } = require('../constant');
-const UserModel = require("../model/user")
-const verifyToken = require("./verifyToken")
+const UserModel = require("../model/user");
+const OrderModel = require("../model/order");
+const verifyToken = require("./verifyToken");
 
 router.get(ROUTE.checkout, verifyToken, async (req, res) => {
     if (verifyToken) {

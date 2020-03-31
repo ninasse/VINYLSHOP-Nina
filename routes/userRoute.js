@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const crypto = require("crypto");
 const UserInfoModel = require('../model/user');
 const ProductModel = require("../model/product");
+const OrderModel = require("../model/order");
 const config = require('../config/config');
 const {
     ROUTE,
@@ -57,40 +58,40 @@ router.post(ROUTE.createUser, async (req, res) => {
             }));
         }
     }
-        const userInfo = await UserInfoModel.findOne({
-            email: req.body.email
-        });
-        if (!userInfo) return res.redirect(url.format({
-            pathname: ROUTE.error,
-            query: {
-                errmsg: 'Fel email!'
-            }
-        }));
-        const validUser = await bcrypt.compare(req.body.password, userInfo.password);
-        if (!validUser) return res.render("errors", {
-            errmsg: 'Fel lösenord!',
+    const userInfo = await UserInfoModel.findOne({
+        email: req.body.email
+    });
+    if (!userInfo) return res.redirect(url.format({
+        pathname: ROUTE.error,
+        query: {
+            errmsg: 'Fel email!'
+        }
+    }));
+    const validUser = await bcrypt.compare(req.body.password, userInfo.password);
+    if (!validUser) return res.render("errors", {
+        errmsg: 'Fel lösenord!',
+        token: (req.cookies.jsonwebtoken !== undefined) ? true : false
+    });
+    const tokenSignature = userInfo.isAdmin ? config.tokenkey.adminjwt : config.tokenkey.userjwt;
+    jwt.sign({
+        userInfo
+    }, tokenSignature, (err, token) => {
+        if (err) return res.render('errors', {
+            errmsg: 'token funkar inte',
             token: (req.cookies.jsonwebtoken !== undefined) ? true : false
         });
-        const tokenSignature = userInfo.isAdmin ? config.tokenkey.adminjwt : config.tokenkey.userjwt;
-        jwt.sign({
-            userInfo
-        }, tokenSignature, (err, token) => {
-            if (err) return res.render('errors', {
-                errmsg: 'token funkar inte',
-                token: (req.cookies.jsonwebtoken !== undefined) ? true : false
-            });
-            if (token) {
-                const cookie = req.cookies.jsonwebtoken;
-                if (!cookie) {
-                    res.cookie('jsonwebtoken', token, {
-                        maxAge: 3500000,
-                        httpOnly: true
-                    })
-                }
-                if (tokenSignature == config.tokenkey.adminjwt) return res.redirect(VIEW.admin);
-                if (tokenSignature == config.tokenkey.userjwt) return res.redirect(VIEW.userAccount);
+        if (token) {
+            const cookie = req.cookies.jsonwebtoken;
+            if (!cookie) {
+                res.cookie('jsonwebtoken', token, {
+                    maxAge: 3500000,
+                    httpOnly: true
+                })
             }
-        })
+            if (tokenSignature == config.tokenkey.adminjwt) return res.redirect(VIEW.admin);
+            if (tokenSignature == config.tokenkey.userjwt) return res.redirect(VIEW.userAccount);
+        }
+    })
 });
 
 router.get(ROUTE.login, async (req, res) => {
