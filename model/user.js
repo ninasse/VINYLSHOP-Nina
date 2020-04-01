@@ -35,6 +35,12 @@ const schemaUser = new Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: "Product" //det som exporteras i product-model 
         }
+    }],
+    orders: [{
+        orderId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Order"
+        }
     }]
 })
 
@@ -52,9 +58,14 @@ schemaUser.methods.addToWishlist = function (product) {
 schemaUser.methods.removeWishList = function (productId) {
     const currentProducts = this.wishlist.filter((product) => {
         return product.productId.toString()
-            !==productId.toString()
+            !== productId.toString()
     })
     this.wishlist = currentProducts;
+    return this.save();
+}
+
+schemaUser.methods.createOrder = function (order) {
+    this.orders.push({ orderId: order._id })
     return this.save();
 }
 
