@@ -4,7 +4,8 @@ const { ROUTE, VIEW } = require('../constant');
 const UserModel = require("../model/user")
 const OrderModel = require("../model/order")
 const verifyToken = require("./verifyToken")
-const stripe = require("stripe")("sk_test_uBWZbcqFpcuqgpoSDovwUbVo00mKGF3yqB")
+const config = require('../config/config');
+const stripe = require("stripe")(config.stripe.stripeKey)
 
 router.get(ROUTE.checkout, verifyToken, async (req, res) => {
     if (verifyToken) {
@@ -12,29 +13,14 @@ router.get(ROUTE.checkout, verifyToken, async (req, res) => {
             .populate('wishlist.productId', {
                 artist: 1,
                 album: 1,
-                price: 1
+                price: 1,
+                quantity: 1
             })
 
-        return stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            line_items: showUserInfo.wishlist.map((product) => {
-                return {
-                    name: product.productId.album,
-                    amount: product.productId.price * 100,
-                    quantity: 1, //product.productId.quantity,
-                    currency: 'sek'
-                }
-            }),
-            success_url: req.protocol + "://" + req.get("Host") + ROUTE.confirmation,
-            cancel_url: req.protocol + "://" + req.get("Host") + ROUTE.error
+        return res.status(202).render(VIEW.checkout, {
+            ROUTE, showUserInfo,
+            token: (req.cookies.jsonwebtoken !== undefined) ? true : false
         })
-            .then((session) => {
-                return res.status(202).render(VIEW.checkout, {
-                    ROUTE, showUserInfo, sessionId: session.id,
-                    token: (req.cookies.jsonwebtoken !== undefined) ? true : false
-                })
-            })
-
     } else {
         return res.status(202).render(VIEW.checkout, {
             ROUTE,
@@ -68,12 +54,45 @@ router.get(ROUTE.order, verifyToken, async (req, res) => {
         });
         const order = await OrderModel.findOne({
             customerId: req.body.userInfo._id
-        }).populate('customerId');
+        }).populate('customerId', { _id: 1, email: 1, firstName: 1, lastName: 1, address: 1 });
         console.log(customer)
 
         customer.createOrder(order)
 
-        return res.redirect(ROUTE.confirmation);
+        res.redirect(ROUTE.toPayment);
+    } else {
+        res.redirect(url.format({
+            pathname: ROUTE.error,
+            query: {
+                errmsg: 'Du måste logga in för att handla hos oss!'
+            }
+        }));
+    }
+})
+router.get(ROUTE.toPayment, verifyToken, async (req, res) => {
+    if (verifyToken) {
+        const UserInfo = await UserModel.findOne({ _id: req.body.userInfo._id })
+        console.log(UserInfo)
+        return stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: UserInfo.wishlist.map((product) => {
+                return {
+                    name: product.productId.album,
+                    amount: product.productId.price * 100,
+                    quantity: product.productId.quantity,
+                    currency: 'sek'
+                }
+            }),
+            success_url: ROUTE.confirmation,
+            cancel_url: ROUTE.error
+            /* success_url: req.protocol + "://" + req.get("Host") + ROUTE.confirmation,
+            cancel_url: req.protocol + "://" + req.get("Host") + ROUTE.error */
+        }).then((session) => {
+            res.render(VIEW.toPayment, {
+                sessionId: session.id,
+                token: (req.cookies.jsonwebtoken !== undefined) ? true : false
+            });
+        })
     } else {
         res.redirect(url.format({
             pathname: ROUTE.error,

@@ -11,7 +11,8 @@ const VIEW = {
     confirmation: 'confirmation',
     error: 'errors',
     resetpassword: 'resetpassword',
-    resetform: 'resetform'
+    resetform: 'resetform',
+    toPayment: 'topayment'
 }
 
 const ROUTE = {
@@ -31,7 +32,8 @@ const ROUTE = {
     resetpassword: '/resetpassword',
     resetpasswordToken: '/resetpassword/:token',
     wishlistRemoveId: '/remove/:id',
-    order: '/order'
+    order: '/order',
+    toPayment: '/topayment'
 }
 
 const PRODUCT = {

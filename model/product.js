@@ -11,7 +11,8 @@ const schemaProduct = new Schema({
     price: Number,
     addedBy: String,
     quantity: {
-        type: Number, default: 1
+        type: Number,
+        default: 1,
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,
