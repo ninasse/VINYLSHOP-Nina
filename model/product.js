@@ -10,6 +10,9 @@ const schemaProduct = new Schema({
     genre: [],
     price: Number,
     addedBy: String,
+    quantity: {
+        type: Number, default: 1
+    },
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"

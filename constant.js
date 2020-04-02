@@ -29,8 +29,9 @@ const ROUTE = {
     confirmation: '/checkout/confirmation',
     error: '/*',
     resetpassword: '/resetpassword',
-    resetpasswordToken: '/resetpassword/:token', 
-    wishlistRemoveId: '/remove/:id'
+    resetpasswordToken: '/resetpassword/:token',
+    wishlistRemoveId: '/remove/:id',
+    order: '/order'
 }
 
 const PRODUCT = {

@@ -4,6 +4,7 @@ const { ROUTE, VIEW } = require('../constant');
 const UserModel = require("../model/user")
 const OrderModel = require("../model/order")
 const verifyToken = require("./verifyToken")
+const stripe = require("stripe")("sk_test_uBWZbcqFpcuqgpoSDovwUbVo00mKGF3yqB")
 
 router.get(ROUTE.checkout, verifyToken, async (req, res) => {
     if (verifyToken) {
@@ -13,7 +14,27 @@ router.get(ROUTE.checkout, verifyToken, async (req, res) => {
                 album: 1,
                 price: 1
             })
-        res.status(202).render(VIEW.checkout, { ROUTE, showUserInfo, token: (req.cookies.jsonwebtoken !== undefined) ? true : false })
+
+        return stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: showUserInfo.wishlist.map((product) => {
+                return {
+                    name: product.productId.album,
+                    amount: product.productId.price * 100,
+                    quantity: 1, //product.productId.quantity,
+                    currency: 'sek'
+                }
+            }),
+            success_url: req.protocol + "://" + req.get("Host") + ROUTE.confirmation,
+            cancel_url: req.protocol + "://" + req.get("Host") + ROUTE.error
+        })
+            .then((session) => {
+                return res.status(202).render(VIEW.checkout, {
+                    ROUTE, showUserInfo, sessionId: session.id,
+                    token: (req.cookies.jsonwebtoken !== undefined) ? true : false
+                })
+            })
+
     } else {
         return res.status(202).render(VIEW.checkout, {
             ROUTE,
@@ -32,25 +53,49 @@ router.post(ROUTE.checkout, verifyToken, async (req, res) => {
         email: req.body.email
     } */
     const Order = await new OrderModel({
-        orderEmail: req.body.email
+        customerId: req.body.userInfo._id,
+        orderItems: req.body.userInfo.wishlist.map(i => ({ ...i }))
     }).save();
+    //console.log(req.body.userInfo.wishlist)
+    //console.log(Order)
+    return res.redirect(ROUTE.order);
+})
 
-    res.redirect(ROUTE.confirmation);
+router.get(ROUTE.order, verifyToken, async (req, res) => {
+    if (verifyToken) {
+        const customer = await UserModel.findOne({
+            _id: req.body.userInfo._id
+        });
+        const order = await OrderModel.findOne({
+            customerId: req.body.userInfo._id
+        }).populate('customerId');
+        console.log(customer)
+
+        customer.createOrder(order)
+
+        return res.redirect(ROUTE.confirmation);
+    } else {
+        res.redirect(url.format({
+            pathname: ROUTE.error,
+            query: {
+                errmsg: 'Du måste logga in för att handla hos oss!'
+            }
+        }));
+    }
 })
 
 router.get(ROUTE.confirmation, verifyToken, async (req, res) => {
 
-    //FIND ONE ORDER WITH ORDEREMAIL CORRESPONDING TO LOGGED IN USER EMAIL
-    const showOrderInfo = await OrderModel.findOne({ orderEmail: req.body.userInfo.email })
-        .populate('user');
-
-
+    //FIND ONE USER IN THE USER DB WITH _ID CORRESPONDING TO THE LOGGED IN USER _ID
     const showUserInfo = await UserModel.findOne({ _id: req.body.userInfo._id })
         .populate('orders.orderId')
-    showUserInfo.createOrder(showOrderInfo)
-    //showOrderInfo.createOrderCustomer(showUserInfo)
+    //FIND ONE ORDER WITH CUSTOMERID CORRESPONDING TO LOGGED IN USER
+    const showOrderInfo = await OrderModel.findOne({ customerId: req.body.userInfo._id })
+    //.populate('customerId')
+
     console.log(showOrderInfo)
-    //console.log(showUserInfo)
+
+    //console.log(req.body)
     res.render(VIEW.confirmation, {
         ROUTE,
         showUserInfo,

@@ -34,7 +34,7 @@ const schemaUser = new Schema({
         productId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Product" //det som exporteras i product-model 
-        }
+        },
     }],
     orders: [{
         orderId: {

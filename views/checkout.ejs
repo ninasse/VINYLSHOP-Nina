@@ -17,7 +17,7 @@
                 </div>
             </div>
             <% }); %>
-
+            <a href="<%= ROUTE.order%>"><button>Godkänn</button></a>
         </div>
     </div>
     <div class="checkout-payment-container">
@@ -54,9 +54,10 @@
                 </div>
             </div>
             <div class="checkout-button">
-                <button type="submit">BESTÄLL</button>
+                <button type="submit" id="btn">BESTÄLL</button>
             </div>
         </form>
     </div>
 </main>
+
 <%- include ("footer.ejs") %>
