@@ -104,7 +104,7 @@ router.get(ROUTE.paymentConf, verifyToken, async (req, res) => {
         });
         const order = await OrderModel.findOne({
             customerId: req.body.userInfo._id
-        }).populate('customerId', { _id: 1, email: 1, firstName: 1, lastName: 1, address: 1 }).populate('productId', { album: 1 });
+        }).populate('customerId', { _id: 1, email: 1, firstName: 1, lastName: 1, address: 1 });
 
         res.render(VIEW.paymentConf, {
             customer,
