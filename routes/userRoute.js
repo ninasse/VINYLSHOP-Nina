@@ -298,7 +298,7 @@ router.post(ROUTE.resetpasswordToken, async (req, res) => {
 })
 
 router.get(ROUTE.logout, (req, res) => {
-    res.clearCookie("jsonwebtoken").redirect(ROUTE.index);
+    res.clearCookie("jsonwebtoken", "order").redirect(ROUTE.index);
 })
 
 module.exports = router;
