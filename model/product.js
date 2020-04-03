@@ -10,7 +10,6 @@ const schemaProduct = new Schema({
     genre: [],
     price: Number,
     addedBy: String,
-    quantity: 1,
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"

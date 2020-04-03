@@ -31,11 +31,12 @@ router.get(ROUTE.checkout, verifyToken, async (req, res) => {
 
 router.post(ROUTE.checkout, verifyToken, async (req, res) => {
 
+
     const Order = await new OrderModel({
         customerId: req.body.userInfo._id,
-        orderItems: req.body.userInfo.wishlist.map(i => ({ ...i }))
+        orderItems: req.body.userInfo.wishlist.map(item => ({ productId: item.productId }))
     }).save();
-
+    console.log(Order)
     const customer = await UserModel.findOne({ _id: req.body.userInfo._id })
 
     customer.createOrder(Order)
