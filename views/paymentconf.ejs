@@ -3,9 +3,21 @@
 <main>
     <div class="container">
         <div class="pageheadline">
-            <h2 class="my-3">Tack för din betalning!</h2>
-        </div>
+            <h1 class="my-3">Tack <%= order.customerId.firstName %>!</h1>
+            <h3>Din order är nu betald.</h3>
 
+        </div>
+        <div>
+            <div><b>Ordernummer: <%= order._id%></b></div>
+            <div><b>Beställda produkter</b></div>
+            <% order.orderItems.forEach( (product)=> { %>
+            <div> Artikelnummer: <%= product.productId %></div>
+            <% }) %>
+            <div><b>Leveransuppgifter:</b></div>
+            <div><%= order.customerId.firstName %> <%= order.customerId.lastName %></div>
+            <div><%= order.customerId.address %></div>
+            <div><%= order.customerId.email %></div>
+        </div>
         <form class="startbuttons" method="get">
             <button type="submit" formaction="/">HEM</button>
             <button type="submit" formaction="gallery">WEBSHOP</button>

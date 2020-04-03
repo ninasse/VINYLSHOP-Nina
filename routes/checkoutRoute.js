@@ -35,22 +35,23 @@ router.post(ROUTE.checkout, verifyToken, async (req, res) => {
         customerId: req.body.userInfo._id,
         orderItems: req.body.userInfo.wishlist.map(i => ({ ...i }))
     }).save();
-    //console.log(req.body.userInfo.wishlist)
-    //console.log(Order)
+
+    const customer = await UserModel.findOne({ _id: req.body.userInfo._id })
+
+    customer.createOrder(Order)
+
     return res.redirect(ROUTE.order);
 })
 
 router.get(ROUTE.order, verifyToken, async (req, res) => {
     if (verifyToken) {
+
         const customer = await UserModel.findOne({
             _id: req.body.userInfo._id
         });
         const order = await OrderModel.findOne({
             customerId: req.body.userInfo._id
-        }).populate('customerId', { _id: 1, email: 1, firstName: 1, lastName: 1, address: 1 });
-        //console.log(customer)
-
-        customer.createOrder(order)
+        })
 
         res.redirect(ROUTE.confirmation);
     } else {
@@ -68,11 +69,10 @@ router.get(ROUTE.confirmation, verifyToken, async (req, res) => {
     //FIND ONE USER IN THE USER DB WITH _ID CORRESPONDING TO THE LOGGED IN USER _ID
     const showUserInfo = await UserModel.findOne({ _id: req.body.userInfo._id })
         .populate('orders.orderId').populate("wishlist.productId")
+
     //FIND ONE ORDER WITH CUSTOMERID CORRESPONDING TO LOGGED IN USER
     const showOrderInfo = await OrderModel.findOne({ customerId: req.body.userInfo._id })
-    //.populate('customerId')
-
-    //console.log(showUserInfo)
+    //.populate('customerId', { _id: 1, email: 1, firstName: 1, lastName: 1, address: 1 });
 
     return stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -88,7 +88,6 @@ router.get(ROUTE.confirmation, verifyToken, async (req, res) => {
         success_url: req.protocol + "://" + req.get("Host") + ROUTE.paymentConf,
         cancel_url: req.protocol + "://" + req.get("Host") + ROUTE.error
     }).then((session) => {
-        console.log(session)
         res.render(VIEW.confirmation, {
             sessionId: session.id,
             showUserInfo,
@@ -105,8 +104,7 @@ router.get(ROUTE.paymentConf, verifyToken, async (req, res) => {
         });
         const order = await OrderModel.findOne({
             customerId: req.body.userInfo._id
-        }).populate('customerId', { _id: 1, email: 1, firstName: 1, lastName: 1, address: 1 });
-        //console.log(customer)
+        }).populate('customerId', { _id: 1, email: 1, firstName: 1, lastName: 1, address: 1 }).populate('productId', { album: 1 });
 
         res.render(VIEW.paymentConf, {
             customer,
