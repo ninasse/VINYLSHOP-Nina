@@ -3,14 +3,25 @@
 <main>
     <div class="pageheadline">
         <h1>Tack <%= showUserInfo.firstName %> för din beställning!</h1>
+        <h2>Klicka för att komma vidare till betalningssidan.</h2>
     </div>
     <div class="userinfo">
 
 
     </div>
     <form class="startbuttons" method="get">
-        <button type="submit" formaction="/">STARTSIDA</button>
-        <button type="submit" formaction="logout">LOGGA UT</button>
+        <button type="submit" formaction="" id="btn">GÅ VIDARE TILL BETALNING</button>
+
     </form>
 </main>
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    var stripe = Stripe('pk_test_HvRgCKnkZiIn4SFbMkgDc8dM00bQmcFoEb');
+    document.querySelector('#btn').addEventListener('click', () => {
+        stripe.redirectToCheckout({
+            sessionId: '<%=sessionId%>'
+        })
+    })
+</script>
+
 <%- include ("footer.ejs") %>
