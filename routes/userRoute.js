@@ -155,7 +155,7 @@ router.get(ROUTE.userAccount, verifyToken, async (req, res) => {
     }).populate('wishlist.productId', {
         artist: 1,
         album: 1,
-        price: 1
+        price: 1,
     })
 
     res.status(200).render(VIEW.userAccount, {
