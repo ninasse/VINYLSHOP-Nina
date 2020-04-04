@@ -19,11 +19,15 @@
             <div><%= order.customerId.email %></div>
         </div>
         <form class="startbuttons" method="get">
-            <button type="submit" formaction="/">HEM</button>
-            <button type="submit" formaction="gallery">WEBSHOP</button>
-            <button type="submit" formaction="login">LOGGA IN</button>
-            <button type="submit" formaction="createuser">BLI MEDLEM</button>
-            <button type="submit" formaction="admin">ADMIN</button>
+            <button type="submit" formaction="<%=ROUTE.index%>">HEM</button>
+            <button type="submit" formaction="<%=ROUTE.gallery%>">WEBSHOP</button>
+            <% if (token) { %>
+            <button type="submit" formaction="<%=ROUTE.userAccount%>">MIN PROFIL</button>
+            <button type="submit" formaction="<%=ROUTE.admin%>">ADMIN</button>
+            <% } else { %>
+            <button type="submit" formaction="<%=ROUTE.login%>">LOGGA IN</button>
+            <button type="submit" formaction="<%=ROUTE.createUser%>">BLI MEDLEM</button>
+            <% }%>
         </form>
     </div>
 </main>

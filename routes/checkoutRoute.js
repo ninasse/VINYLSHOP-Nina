@@ -33,17 +33,18 @@ router.post(ROUTE.checkout, verifyToken, async (req, res) => {
 
     const Order = await new OrderModel({
         customerId: req.body.userInfo._id,
-        orderItems: req.body.userInfo.wishlist.map(item => ({ productId: item.productId }))
+        orderItems: Array.from(req.body.userInfo.wishlist)
+        //orderItems: req.body.userInfo.wishlist.map(i => ({ productId: i.productId }))
     }).save();
 
-    const cookie = res.cookie('order', Order._id)
-
+    res.cookie('order', Order._id)
+    console.log(req.body.userInfo.wishlist)
     console.log(Order)
 
     const customer = await UserModel.findOne({ _id: req.body.userInfo._id })
     customer.createOrder(Order)
 
-    return res.redirect(ROUTE.confirmation);
+    res.redirect(ROUTE.confirmation);
 })
 
 router.get(ROUTE.confirmation, verifyToken, async (req, res) => {
@@ -85,13 +86,12 @@ router.get(ROUTE.paymentConf, verifyToken, async (req, res) => {
             _id: req.cookies.order
         }).populate('customerId', { _id: 1, email: 1, firstName: 1, lastName: 1, address: 1 });
 
-        res.cookie('order', '')
-
-        res.render(VIEW.paymentConf, {
+        return res.render(VIEW.paymentConf, {
+            ROUTE,
             customer,
             order,
             token: (req.cookies.jsonwebtoken !== undefined) ? true : false
-        });
+        })
     } else {
         res.redirect(url.format({
             pathname: ROUTE.error,

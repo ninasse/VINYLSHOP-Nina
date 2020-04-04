@@ -32,7 +32,6 @@ const ROUTE = {
     resetpassword: '/resetpassword',
     resetpasswordToken: '/resetpassword/:token',
     wishlistRemoveId: '/remove/:id',
-    order: '/order',
     paymentConf: '/order/confirmed'
 }
 

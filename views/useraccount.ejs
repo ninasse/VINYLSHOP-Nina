@@ -11,13 +11,13 @@
         <% } %>
     </div>
     <div class="userinfo">
-        <h3>Användare: </h3>
+        <h3>KUNDUPPGIFTER: </h3>
         <span><%= loggedIn.firstName %> <%= loggedIn.lastName %></span>
         <span><%= loggedIn.address %></span>
         <span><%= loggedIn.email %></span>
     </div>
     <div class="orderinfo">
-        <h3>Min önskelista: </h3>
+        <h3>VARUKORG: </h3>
         <div class="wishlist-continer">
             <% user.wishlist.forEach( (obj)=> { %>
             <div class="wishlist-innercontiner">
